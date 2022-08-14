@@ -1,0 +1,14 @@
+How to get started:
+1) Install the IDE
+2) Install the CH340 drivers (https://learn.sparkfun.com/tutorials/how-to-install-ch340-drivers/all#drivers-if-you-need-them)
+3) Plug in the nano, and go to the Tools menu:
+	Board: Arduino Nano
+	Processor: Select ATmega328P or ATmega328P (Old Bootloader), whichever one works
+	Port: Select the COM port the nano shows up as, see Device manager.
+	Programmer: AVRISP mkII
+	
+4) Write the sketch, download and have fun	
+5) To include a ZIP library, use Sketch->Include Library
+	
+	
+	
