@@ -6,8 +6,11 @@
 #define SF_SOLAR (float)(1.0 + 47000.0/6800.0)
 #define ADC_LSB (float)(5.0/1024)
 
-#define HEAT_TIME 180  // in seconds
-#define PUMP_TIME 30   // in seconds
+#define HEAT_TIME 18  // in seconds
+#define PUMP_TIME 3   // in seconds
+#define SOLAR_VOLT_MIN (float)12.0 //Volt
+#define SOLAR_VOLT_OK (float)14.0 //Volt
+
 
 const byte PIN_RELAY = 4;   // Relay control output  
 const byte PIN_CLK = 3;     // define CLK pin (any digital pin)
@@ -34,6 +37,7 @@ unsigned int adcVal = 0;
 unsigned int secondCnt = 0;
 unsigned int displayCnt = 0;
 bool bPumpOn = false;
+bool bSolarOk = false;
 
 // Use Interpolation to find the temperature from ADC value 
 float getNtcTemp(float adcRdVal)
@@ -79,7 +83,7 @@ float getNtcTemp(float adcRdVal)
   {
     slope = (ntcTemp[ind1] - ntcTemp[ind2])/(ntcAdcVal[ind1] - ntcAdcVal[ind2]);
     return (-slope * (ntcAdcVal[ind1]-adcVal) + ntcTemp[ind1]);
-  }    
+  }
 }
 
 void setup() {
@@ -92,13 +96,26 @@ void setup() {
   secondCnt = 0;
   displayCnt = 0;
   bPumpOn = false;
+  bSolarOk = false;    
 }
 
 void loop() {
-
+  // Check Solar voltage level
+  adcVal=analogRead(PIN_SOLAR);
+  rdSolar = (float)adcVal * ADC_LSB * SF_SOLAR;
+  if(rdSolar < SOLAR_VOLT_MIN)
+  {
+    bSolarOk = false; 
+  }
+  else if (rdSolar >= SOLAR_VOLT_OK)
+  {
+    bSolarOk = true; 
+  }
+  // Handle the display  
   switch(displayCnt)
   {
-    case 0:  
+    case 0:
+    case 1:
       digitalWrite(LED_BUILTIN, true);
       adcVal=analogRead(PIN_TEMP);
       rdTemp = getNtcTemp((float)adcVal);
@@ -115,13 +132,21 @@ void loop() {
       display.printRaw(CChar,3);
       displayCnt++;
       break;
-    case 1: 
+    case 2:
       digitalWrite(LED_BUILTIN, false);
       adcVal=analogRead(PIN_SOLAR);
       rdSolar = (float)adcVal * ADC_LSB * SF_SOLAR;
       display.printNumber((int)rdSolar,false,false,false);
       display.printRaw(VChar,3);
       displayCnt++;
+      break;
+    case 3:
+      if(!bSolarOk)
+      {
+        display.print("LoLo");
+      }
+      displayCnt = 0;  
+      break;
     default:
       displayCnt = 0;  
       break;
@@ -133,7 +158,7 @@ void loop() {
     digitalWrite(PIN_RELAY, false);
     bPumpOn = false;
   }
-  else if(secondCnt >= HEAT_TIME && secondCnt <= HEAT_TIME + PUMP_TIME)
+  else if( (secondCnt >= HEAT_TIME) && (secondCnt <= (HEAT_TIME + PUMP_TIME)) && bSolarOk)
   {
     digitalWrite(PIN_RELAY, true);
     bPumpOn = true;
