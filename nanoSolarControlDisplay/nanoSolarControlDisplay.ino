@@ -6,10 +6,10 @@
 #define SF_SOLAR (float)(1.0 + 47000.0/6800.0)
 #define ADC_LSB (float)(5.0/1024)
 
-#define HEAT_TIME 18  // in seconds
-#define PUMP_TIME 3   // in seconds
-#define SOLAR_VOLT_MIN (float)12.0 //Volt
-#define SOLAR_VOLT_OK (float)14.0 //Volt
+#define HEAT_TIME 180  // in seconds
+#define PUMP_TIME 30   // in seconds
+#define SOLAR_VOLT_MIN (float)8.0 //Volt
+#define SOLAR_VOLT_OK (float)8.5 //Volt
 
 
 const byte PIN_RELAY = 4;   // Relay control output  
